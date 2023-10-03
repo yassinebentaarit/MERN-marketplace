@@ -16,4 +16,5 @@ const app = express();
 app.listen(4044, () => {
   console.log('Server is running on port 4044');
 });
-app.locals
+
+app.get
