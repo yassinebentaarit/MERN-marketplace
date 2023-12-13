@@ -3,11 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-<<<<<<< HEAD
   "type": "module",
-=======
-  "type":"module",
->>>>>>> 0220d7495da16fd7befa7bb32379484faef9b6b8
   "scripts": {
     "dev": "nodemon index.js",
     "start": "node index.js"
@@ -16,12 +12,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-<<<<<<< HEAD
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "mongoose": "^7.5.3"
-=======
-    "express": "^4.18.2"
->>>>>>> 0220d7495da16fd7befa7bb32379484faef9b6b8
+    "mongoose": "^8.0.3"
   }
 }
