@@ -6,6 +6,22 @@ const userSchema = new mongoose.Schema({
     require:true,
     unique: true
   },
+  nom: {
+    type:String,
+    require:true,
+  },
+  prenom: {
+    type:String,
+    require:true,
+  },
+  num: {
+    type:Number,
+    default: null
+  },
+  dateNaissance:{
+    type:Date,
+    require:true
+  },
   email: {
     type:String,
     require:true,
