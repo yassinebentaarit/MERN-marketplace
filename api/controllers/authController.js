@@ -6,7 +6,9 @@ import { errorHandler } from "../utils/error.js";
 export const signup = async (req, res, next) => {
   const {username, nom, prenom, num, dateNaissance,  email, password} = req.body;
   const hashPassword = bcrypt.hashSync(password,10);
-  const newUser = new User({username, nom, prenom, num, dateNaissance, email, password:hashPassword});
+  const newUser = new User({username:username, nom:nom, prenom:prenom, num:num, dateNaissance:dateNaissance, email:email, password:hashPassword});
+  console.log(newUser)
+
   try{
     await newUser.save();
     res.status(201).json('User created !!');

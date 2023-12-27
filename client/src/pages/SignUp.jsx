@@ -51,7 +51,8 @@ export default function SignUp() {
   const verifNum = (num) => {
     const stringNum= num.toString();
     if (stringNum.length==8) {
-      return setNumIn8(true);
+      setNumIn8(true);
+      return t
     }
   }
 
@@ -59,7 +60,7 @@ export default function SignUp() {
     e.preventDefault();
     setCountSubmit(1);
       try {
-        if (verifNum(num)&& validPassword) {
+        if ((numIn8) && (validPassword)) {
           setLoading(true)
           const res = await fetch ('/api/auth/signup',
           {
