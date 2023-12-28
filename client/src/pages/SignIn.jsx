@@ -1,92 +1,80 @@
-import { useState } from 'react'
-import {Link, useNavigate} from 'react-router-dom'
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { signInStart, signInSuccess, signInFailure } from "../redux/user/userSlice";
 
 export default function SignIn() {
-
   const [formData, setFormData] = useState({});
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [numIn8, setNumIn8] = useState(false);
-  const [numMsg, setNumMsg] = useState('');
-  const [countSubmit, setCountSubmit] = useState(0);
-  const [isUnder16, setIsUnder16] = useState(false);
-  const [validPassword, setValidPassword] = useState(false);
-  const [passwordMsg, setPasswordMsg] = useState('');
+  const { loading, error } = useSelector((state) => state.user);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleChange = (e) => {
-    setFormData(
-      {
-        ...formData,
-        [e.target.id]:e.target.value,
-      } 
-    );
-    if (e.target.id === 'num'){
-      if(e.target.value.length===8){
-        setNumIn8(true)
-      } else {
-        setNumIn8(false)
-      }
-    }
+    setFormData({
+      ...formData,
+      [e.target.id]: e.target.value,
+    });
   };
 
-  const handleSubmit = async(e) => {  
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setCountSubmit(1);
-      try {
-        
-          setLoading(true)
-          const res = await fetch ('/api/auth/signin',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData),
-          });
-          const data = await res.json();
-          if (data.success === false) {
-            setLoading(false);
-            setError(data.message);
-            return
-          }
-          setLoading(false);
-          setError(null);
-          navigate('/');
-      } catch (error) {
-        setLoading(false);
-        setError(error.message);
+    try {
+      dispatch(signInStart());
+      const res = await fetch("/api/auth/signin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(signInFailure(data.message));
+        return;
       }
-  }
+      dispatch(signInSuccess(data));
+      navigate("/");
+    } catch (error) {
+      dispatch(signInFailure(data.message));
+    }
+  };
   return (
-    <div className='p-3 ml-20 mt-4 max-w-lg mx-auto '>
-      <h1 className='text-4xl text-center font-semibold my-7 pr-20'>Sign In</h1>
-      <form onSubmit={handleSubmit} className='flex flex-col gap-4 w-11/12 pt-10'> 
-        <input 
-          type="email" 
-          placeholder='email'
-          className='border p-3 rounded-lg' 
-          id='email'
-          onChange={handleChange}/>
-        <input 
-          type="password" 
-          placeholder='password'
-          className='border p-3 rounded-lg' 
-          id='password'
-          onChange={handleChange}/>
-        <button disabled={loading} className='bg-slate-700 text-white p-3 
+    <div className="p-3 ml-20 mt-4 max-w-lg mx-auto ">
+      <h1 className="text-4xl text-center font-semibold my-7 pr-20">Sign In</h1>
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-4 w-11/12 pt-10"
+      >
+        <input
+          type="email"
+          placeholder="email"
+          className="border p-3 rounded-lg"
+          id="email"
+          onChange={handleChange}
+        />
+        <input
+          type="password"
+          placeholder="password"
+          className="border p-3 rounded-lg"
+          id="password"
+          onChange={handleChange}
+        />
+        <button
+          disabled={loading}
+          className="bg-slate-700 text-white p-3 
         rounded-lg uppercase hover:opacity-95 
-        disabled: opacitiy-80'>
-          {loading? 'Loading... ' : 'Signing In'}
+        disabled: opacitiy-80"
+        >
+          {loading ? "Loading... " : "Signing In"}
         </button>
       </form>
-      <div className='flex gap-2 mt-5'>
+      <div className="flex gap-2 mt-5">
         <p>Don't have an account?</p>
         <Link to={"/sign-up"}>
-          <span className='text-blue-700'>Sign Up</span>
+          <span className="text-blue-700">Sign Up</span>
         </Link>
       </div>
-      {error && <p className='text-red-600 mt-5'> {error}</p>}
+      {error && <p className="text-red-600 mt-5"> {error}</p>}
     </div>
-  )
+  );
 }
