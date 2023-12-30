@@ -3,7 +3,9 @@ import {Link, useNavigate} from 'react-router-dom'
 import OAuth from '../components/OAuth';
 
 export default function SignUp() {
-
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordMatch, setPasswordMatch] = useState(true);
   const [formData, setFormData] = useState({});
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -15,7 +17,18 @@ export default function SignUp() {
   const [passwordMsg, setPasswordMsg] = useState('');
   const navigate = useNavigate();
 
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
+    setPasswordMatch(e.target.value === confirmPassword);
+  };
+
+  const handleConfirmPasswordChange = (e) => {
+    setConfirmPassword(e.target.value);
+    setPasswordMatch(password === e.target.value);
+  };
+
   const handleChange = (e) => {
+    
     setFormData(
       {
         ...formData,
@@ -59,7 +72,14 @@ export default function SignUp() {
 
   const handleSubmit = async(e) => {  
     e.preventDefault();
-    setCountSubmit(1);
+    // Check for empty passwords
+    if (password === '' || confirmPassword === '') {
+      // At least one of the passwords is empty, you can proceed with form submission
+      console.log('Form submitted successfully');
+    } else {
+      // Both passwords are non-empty, check if they match
+      if (password === confirmPassword) {
+        // Passwords match, you can proceed with form submissionsetCountSubmit(1);
       try {
         if ((numIn8) && (validPassword)) {
           setLoading(true)
@@ -89,6 +109,14 @@ export default function SignUp() {
         setLoading(false);
         setError(error.message);
       }
+        console.log('Form submitted successfully with confirmed password');
+      } else {
+        // Passwords do not match, show an error or take appropriate action
+        console.error('Passwords do not match');
+      }
+    }
+
+    
   }
   return (
     <div className='p-3 ml-20 mt-4 max-w-lg mx-auto '>
