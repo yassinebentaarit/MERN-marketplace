@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import {
   getDownloadURL,
   getStorage,
@@ -7,10 +7,15 @@ import {
   uploadBytesResumable,
 } from "firebase/storage";
 import { app } from "../firebase";
+import { 
+  updateUserFailure,
+  updateUserStart,
+  updateUserSuccess 
+} from "../redux/user/userSlice";
 
 export default function Profile() {
   const fileRef = useRef(null);
-  const { currentUser } = useSelector((state) => state.user);
+  const { currentUser,loading,error } = useSelector((state) => state.user);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordMatch, setPasswordMatch] = useState(true);
@@ -18,6 +23,8 @@ export default function Profile() {
   const [filePerc, setFilePerc] = useState(0);
   const [FileUploadError, setFileUploadError] = useState(false);
   const [formData, setFormData] = useState({});
+  const [ updateSuccess, setUpdateSuccess] = useState(false);
+  const dispatch = useDispatch();
 
   const handlePasswordChange = (e) => {
     setPassword(e.target.value);
@@ -29,21 +36,35 @@ export default function Profile() {
     setPasswordMatch(password === e.target.value);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
 
     // Perform any additional form submission logic here
-    if (password === "" && confirmPassword === "") {
-      // At least one of the passwords is empty, you can proceed with form submission
-      console.log("Form submitted successfully");
+    if ((password === "" && confirmPassword === "") || passwordMatch) {
+      //passwords match or not changed
+      try {
+        dispatch(updateUserStart());
+        const res = await fetch(`/api/user/update/${currentUser._id}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
+        const data = await res.json();
+        if (data.success === false) {
+          dispatch(updateUserFailure(data.message));
+          return;
+        }
+        dispatch(updateUserSuccess(data));
+        setUpdateSuccess(true);
+      } catch (error) {
+        dispatch(updateUserFailure(error.message));
+        
+      console.log("Form submitted successfully");}
     } else {
-      if (passwordMatch) {
-        // Passwords match, you can proceed with form submission
-        console.log("Form submitted successfully");
-      } else {
-        // Passwords do not match, show an error or take appropriate action
-        console.error("Passwords do not match");
-      }
+      // Passwords do not match, show an error or take appropriate action
+      console.error("Passwords do not match");
     }
   };
 
@@ -52,7 +73,6 @@ export default function Profile() {
   // allow write: if
   // request.resource.size < 2 * 1024 * 1024 &&
   // request.resource.contentType.matches('image/.*')
-
 
   useEffect(() => {
     if (file) {
@@ -67,7 +87,7 @@ export default function Profile() {
     const uploadTask = uploadBytesResumable(storageRef, file);
 
     uploadTask.on(
-      'state_changed',
+      "state_changed",
       (snapshot) => {
         const progress =
           (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
@@ -82,6 +102,13 @@ export default function Profile() {
         );
       }
     );
+  };
+
+  const handleChange = (e) => {
+    if (e.target.id === "password") {
+      handlePasswordChange(e);
+    }
+    setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
   return (
@@ -104,58 +131,78 @@ export default function Profile() {
         />
         <p className="text-sm self-center">
           {FileUploadError ? (
-            <span className="text-red-700"> Error Image upload (Image must be less than 2mb)</span>
-          ) : filePerc > 0 && filePerc < 100 ? ( 
-            <span className="text-slate-800"> {`Uploading ${filePerc}%`}</span> 
+            <span className="text-red-700">
+              {" "}
+              Error Image upload (Image must be less than 2mb)
+            </span>
+          ) : filePerc > 0 && filePerc < 100 ? (
+            <span className="text-slate-800"> {`Uploading ${filePerc}%`}</span>
           ) : filePerc === 100 ? (
-            <span className="text-green-700"> Image Successfully uploaded! </span>
-          ) : ( '' )}
+            <span className="text-green-700">
+              {" "}
+              Image Successfully uploaded!{" "}
+            </span>
+          ) : (
+            ""
+          )}
         </p>
         <input
           type="text"
           placeholder="username"
+          defaultValue={currentUser.username}
           id="username"
           className="border p-3 rounded-lg "
+          onChange={handleChange}
         />
         <input
           type="text"
           placeholder="fullname"
+          defaultValue={currentUser.fullname}
           id="fullname"
           className="border p-3 rounded-lg "
+          onChange={handleChange}
         />
         <input
           type="number"
           placeholder="votre numero"
+          defaultValue={currentUser.num}
           id="num"
           className="border p-3 rounded-lg "
+          onChange={handleChange}
         />
         <input
           type="date"
           id="dateNaissance"
           className="border p-3 rounded-lg "
+          onChange={handleChange}
         />
         <input
           type="email"
           placeholder="email"
+          defaultValue={currentUser.email}
           id="email"
           className="border p-3 rounded-lg "
+          onChange={handleChange}
         />
         <input
           type="password"
           placeholder="mot de passe"
           id="password"
           className="border p-3 rounded-lg "
+          onChange={handleChange}
         />
         <input
           type="password"
           placeholder="confirmer votre mot de passe"
           id="confirmPassword"
           className="border p-3 rounded-lg "
+          onChange={handleConfirmPasswordChange}
         />
         {!passwordMatch && (
           <p className="text-red-600 mt-5">Passwords do not match</p>
         )}
         <button
+          disabled={loading}
           type="submit"
           className="
           bg-slate-700 
@@ -165,7 +212,7 @@ export default function Profile() {
           disabled:opacity-80
         "
         >
-          Submit
+          {loading? 'Loading ...' : 'Update' }
         </button>
       </form>
       <div className="flex justify-between mt-5">
@@ -174,6 +221,9 @@ export default function Profile() {
         </span>
         <span className="text-red-800 cursor-pointer">deconnexion</span>
       </div>
+
+      <p className="text-red-700"> {error? error: ''}</p>
+      <p className="text-green-700">{updateSuccess? 'User updated successfully': ''}</p>
     </div>
   );
 }

@@ -6,10 +6,7 @@ const userSchema = new mongoose.Schema({
     require:true,
     unique: true
   },
-  nom: {
-    type:String,
-  },
-  prenom: {
+  fullname: {
     type:String,
   },
   num: {

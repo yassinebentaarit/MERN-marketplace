@@ -131,15 +131,9 @@ export default function SignUp() {
           onChange={handleChange}/>
         <input 
           type="text" 
-          placeholder='nom'
+          placeholder='fullname'
           className='border p-3 rounded-lg' 
-          id='nom'
-          onChange={handleChange}/>
-        <input 
-          type="text" 
-          placeholder='prenom'
-          className='border p-3 rounded-lg' 
-          id='prenom'
+          id='fullname'
           onChange={handleChange}/>
         <input 
           type="number" 
