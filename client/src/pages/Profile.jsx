@@ -109,6 +109,7 @@ export default function Profile() {
       handlePasswordChange(e);
     }
     setFormData({ ...formData, [e.target.id]: e.target.value });
+
   };
 
   return (
