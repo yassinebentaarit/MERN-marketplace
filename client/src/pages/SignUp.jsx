@@ -10,7 +10,7 @@ export default function SignUp() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [numIn8, setNumIn8] = useState(false);
-  const [numMsg, setNumMsg] = useState("a");
+  const [numMsg, setNumMsg] = useState("");
   const [countSubmit, setCountSubmit] = useState(0);
   const [isUnder16, setIsUnder16] = useState(false);
   const [validPassword, setValidPassword] = useState(false); //verification: mot de passe entre 4 et 32 caractere
@@ -61,7 +61,7 @@ export default function SignUp() {
     const stringNum = num.toString();
     if (stringNum.length == 8) {
       setNumIn8(true);
-      setNumMsg("kjnn")
+      setNumMsg("le numero doit contenir 8 chiffres")
       return setNumIn8;
     } else { 
       setNumIn8(false)
@@ -142,7 +142,7 @@ if (numIn8) {
           id="num"
           onChange={handleChange}
         />
-        {!numIn8 && (
+        {(!numIn8) && (
           <p style={{ marginTop: "-15px" }} className="text-red-600 mt-5">
             {" "}
             {numMsg}
